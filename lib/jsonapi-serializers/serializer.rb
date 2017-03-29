@@ -20,9 +20,9 @@ module JSONAPI
         JSONAPI::Serializer.serialize(object, options)
       end
 
-      # Hack the resource on polymorphic relations
-      def override_resource(obj)
-        JSONAPI::Serializer.override_resource(obj)
+      # Hack to dig resource on polymorphic associations
+      def dig_polymorphism(obj)
+        JSONAPI::Serializer.dig_polymorphism(obj)
       end
     end
 
@@ -238,7 +238,7 @@ module JSONAPI
       protected :evaluate_attr_or_block
     end
 
-    def self.override_resource(obj)
+    def self.dig_polymorphism(obj)
     end
 
     def self.find_serializer_class_name(object, options)
@@ -357,7 +357,7 @@ module JSONAPI
         objects.compact.each do |obj|
           # Use the mutability of relationship_data as the return datastructure to take advantage
           # of the internal special merging logic.
-          find_recursive_relationships(override_resource(obj) || obj, inclusion_tree, relationship_data, passthrough_options)
+          find_recursive_relationships(dig_polymorphism(obj) || obj, inclusion_tree, relationship_data, passthrough_options)
         end
 
         result['included'] = relationship_data.map do |_, data|
@@ -443,7 +443,7 @@ module JSONAPI
       # http://jsonapi.org/format/#document-structure-top-level
       return [] if !objects.any?
 
-      objects.map { |obj| serialize_primary(override_resource(obj) || obj, options) }
+      objects.map { |obj| serialize_primary(dig_polymorphism(obj) || obj, options) }
     end
     class << self; protected :serialize_primary_multi; end
 
