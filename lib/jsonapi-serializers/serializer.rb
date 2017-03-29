@@ -349,7 +349,7 @@ module JSONAPI
         objects.compact.each do |obj|
           # Use the mutability of relationship_data as the return datastructure to take advantage
           # of the internal special merging logic.
-          find_recursive_relationships(obj&.resource || obj, inclusion_tree, relationship_data, passthrough_options)
+          find_recursive_relationships(obj.try(:resource) || obj, inclusion_tree, relationship_data, passthrough_options)
         end
 
         result['included'] = relationship_data.map do |_, data|
@@ -435,7 +435,7 @@ module JSONAPI
       # http://jsonapi.org/format/#document-structure-top-level
       return [] if !objects.any?
 
-      objects.map { |obj| serialize_primary(obj&.resource || obj, options) }
+      objects.map { |obj| serialize_primary(obj.try(:resource) || obj, options) }
     end
     class << self; protected :serialize_primary_multi; end
 
