@@ -273,6 +273,7 @@ module JSONAPI
       options[:meta] = options.delete('meta') || options[:meta]
       options[:links] = options.delete('links') || options[:links]
       options[:fields] = options.delete('fields') || options[:fields] || {}
+      options[:skip_include_check] = options.delete('skip_include_check') || options[:skip_include_check] || false
 
       # Deprecated: use serialize_errors method instead
       options[:errors] = options.delete('errors') || options[:errors]
@@ -302,7 +303,8 @@ module JSONAPI
         namespace: options[:namespace],
         include: includes,
         fields: fields,
-        base_url: options[:base_url]
+        base_url: options[:base_url],
+        skip_include_check: options[:skip_include_check]
       }
 
       if !options[:skip_collection_check] && options[:is_collection] && !objects.respond_to?(:each)
@@ -478,17 +480,19 @@ module JSONAPI
           object = serializer.has_many_relationship(unformatted_attr_name, attr_data)
         end
 
-        if !is_valid_attr
-          raise JSONAPI::Serializer::InvalidIncludeError.new(
-            "'#{attribute_name}' is not a valid include.")
-        end
+        unless options[:skip_include_check]
+          if !is_valid_attr
+            raise JSONAPI::Serializer::InvalidIncludeError.new(
+              "'#{attribute_name}' is not a valid include.")
+          end
 
-        if attribute_name != serializer.format_name(attribute_name)
-          expected_name = serializer.format_name(attribute_name)
+          if attribute_name != serializer.format_name(attribute_name)
+            expected_name = serializer.format_name(attribute_name)
 
-          raise JSONAPI::Serializer::InvalidIncludeError.new(
-            "'#{attribute_name}' is not a valid include.  Did you mean '#{expected_name}' ?"
-          )
+            raise JSONAPI::Serializer::InvalidIncludeError.new(
+              "'#{attribute_name}' is not a valid include.  Did you mean '#{expected_name}' ?"
+            )
+          end
         end
 
         # We're finding relationships for compound documents, so skip anything that doesn't exist.
