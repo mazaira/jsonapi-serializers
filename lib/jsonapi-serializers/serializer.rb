@@ -290,7 +290,7 @@ module JSONAPI
       #
       fields = {}
       # Normalize fields to accept a comma-separated string or an array of strings.
-      options[:fields].map do |type, whitelisted_fields|
+      options[:fields].each do |type, whitelisted_fields|
         whitelisted_fields = [whitelisted_fields] if whitelisted_fields.is_a?(Symbol)
         whitelisted_fields = whitelisted_fields.split(',') if whitelisted_fields.is_a?(String)
         fields[type.to_s] = whitelisted_fields.map(&:to_sym)
